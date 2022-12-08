@@ -1,5 +1,5 @@
 
-## Fig 2
+## Fig 5
 
 library(sf)
 library(tcltk)
