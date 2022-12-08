@@ -1,4 +1,6 @@
+## 12/8/2022
 ## figure 2 and 3
+## download data from data folder first
 
 library(sf)
 library(tcltk)
@@ -21,7 +23,6 @@ forestarea.grd = rasterFromXYZ(forestarea.grd)
 chn.shp2 = readOGR(dsn=yourdatafolder, layer="CHN_adm1_wTaiwan")
 
 # figure 2b - 2c
-## patch size
 yrs = 1986:2020
 
 mean.stack = stack()
@@ -57,7 +58,7 @@ list.title = list("Mean Patch Size (ha)", "Median Patch Size (ha)",  "Disturbanc
 
 png.title = list("MeanPatchSize", "MedianPatchSize",  "DisturbanceFrequence")
 
-# produce figures
+# produce figures using a for loop
 for (i in 1:3){
 
 r1.grd = calc(list.stack[[i]], mean, na.rm = TRUE)
@@ -78,11 +79,8 @@ rasterVis::levelplot(r1.grd,
           zlim = r1.range,
 		  margin = FALSE,
 		  main = list.title[[i]],
-		  # main = expression("Net C Uptake Trend"~ "("~gC ~ m^{-2} ~ yr ^{-1}~ yr ^{-1}~ "1980-2017" ~")"),		  
           maxpixels = nrow(r1.grd)*ncol(r1.grd),
-          # col.regions = rev(colorRampPalette(c("blue", "white", "red"))(255)),
 		  col.regions = colorRampPalette(c("#4575b4", "#ffffbf", "#d73027"))(255),
-          # scales=list(x=list(cex=1),y=list(cex=1)),
           # xlab=list(label = "Longtitude", cex=1),ylab=list(label = "Latitude", cex=1),
 		  xlab=NULL, ylab=NULL,
 		  scales=list(draw=FALSE),
@@ -97,20 +95,16 @@ rasterVis::levelplot(r1.grd,
 
 dev.off()
 
-
+# create histgram plot 
 myData <- as.vector(as.matrix(r1.grd))
 binwidth <- as.numeric((r1.range[2]-r1.range[1])/20)
-
-# create plot    
+   
 library(ggplot2)   # CRAN version 2.2.1 used
 n_bins <- length(ggplot2:::bin_breaks_width(range(myData, na.rm = TRUE), width = binwidth)$breaks) - 1L
 ggplot() + geom_histogram(aes(x = myData), binwidth = binwidth, fill = colorRampPalette(c("#4575b4", "#ffffbf", "#d73027"))(n_bins)) + 
 aes(y=100*stat(count)/sum(stat(count)))+
 geom_vline(aes(xintercept = mean(myData, na.rm = TRUE)),col='black',size=2, lty = 2)+
 theme_bw() + 
-  # scale_fill_discrete(breaks=shortnames,
-                      # name="",
-                      # labels=shortnames)+
   theme(legend.text = element_text(size = 18))+
   theme(axis.title.x = element_text(face="bold", colour="black", size=18),axis.text.x  = element_text(colour="black",size=18))+
   theme(axis.title.y = element_text(face="bold", colour="black", size=18),axis.text.y  = element_text(colour="black",size=18))+
@@ -123,10 +117,9 @@ ggsave(paste0(yourdatafolder,png.title[[i]],"_histgram.png"), width = 6, height 
 
 }
 
-# look at trend ##################################
+########### at trend ##################################
 # install.packages("spatialEco")
 library(spatialEco)
-# raster.kendall(x, tau = FALSE, intercept = FALSE, p.value = FALSE, z.value = FALSE, confidence = FALSE, autocorrelation = FALSE, ...)
 
 #length of NAs
 lenNA = function(x){return(length(which(is.na(x))))}
@@ -166,8 +159,8 @@ r1.grd[r1.grd > r1.range[2]] = r1.range[2]
 r1.grd[r1.grd < r1.range[1]] = r1.range[1]
 
 # plot(r1.grd)
-## extract p value < 0.1, and add to plot
-# https://github.com/liuzh811/ForestDegradationWestAfrica/blob/master/function.r
+## extract p value < 0.05, and add to plot
+# Ex.pts was from https://github.com/liuzh811/ForestDegradationWestAfrica/blob/master/function.r
 pts.sp.sig1 = Ex.pts(list.stack2[[i]][[2]], sig.level = 0.05) #extract significant relation points
 
 png(paste0(yourdatafolder,png.title2[[i]],".png"),height = 1500, width = 2000, res = 300, units = "px")
@@ -177,16 +170,10 @@ rasterVis::levelplot(r1.grd,
           zlim = r1.range,
 		  margin = FALSE,
 		  main = list.title2[[i]],
-		  # main = expression("Net C Uptake Trend"~ "("~gC ~ m^{-2} ~ yr ^{-1}~ yr ^{-1}~ "1980-2017" ~")"),		  
           maxpixels = nrow(r1.grd)*ncol(r1.grd),
           col.regions = colorRampPalette(c("blue", "white", "red"))(255),
-		  # col.regions = colorRampPalette(c('#b2182b','#ef8a62','#fddbc7','#f7f7f7','#d1e5f0','#67a9cf','#2166ac'))(255),
-		  # col.regions = colorRampPalette(c("blue", "yellow", "red"))(255),
-          # scales=list(x=list(cex=1),y=list(cex=1)),
-          # xlab=list(label = "Longtitude", cex=1),ylab=list(label = "Latitude", cex=1),
 		  xlab=NULL, ylab=NULL,
 		  scales=list(draw=FALSE),
-		  # layout=c(5, 1),
 		  colorkey=list(space="bottom", 
 		                at=seq(r1.range[1], r1.range[2], length.out=100), 
 						height=1, 
@@ -206,13 +193,9 @@ binwidth <- as.numeric((r1.range[2]-r1.range[1])/20)
 
 n_bins <- length(ggplot2:::bin_breaks_width(range(myData, na.rm = TRUE), width = binwidth)$breaks) - 1L
 ggplot() + geom_histogram(aes(x = myData), binwidth = binwidth, fill = colorRampPalette(c("blue", "white", "red"))(n_bins)) + 
-# ggplot() + geom_histogram(aes(x = myData), binwidth = binwidth, fill = colorRampPalette(c("#4575b4", "#ffffbf", "#d73027"))(n_bins)) + 
 	aes(y=100*stat(count)/sum(stat(count)))+
 	geom_vline(aes(xintercept = mean(myData, na.rm = TRUE)),col='black',size=2, lty = 2)+
 	theme_bw() + 
-  # scale_fill_discrete(breaks=shortnames,
-                      # name="",
-                      # labels=shortnames)+
   theme(legend.text = element_text(size = 18))+
   theme(axis.title.x = element_text(face="bold", colour="black", size=18),axis.text.x  = element_text(colour="black",size=18))+
   theme(axis.title.y = element_text(face="bold", colour="black", size=18),axis.text.y  = element_text(colour="black",size=18))+
@@ -225,10 +208,7 @@ ggsave(paste0(yourdatafolder,png.title2[[i]],"_histgram.png"), width = 6, height
 
 }
 
-#  severity 
-# see NDVI
- 
-## patch size
+##########  severity #################
 yrs = 1987:2020
 
 meanNDVI.stack = stack()
@@ -259,10 +239,8 @@ list.title3 = list("Mean NDVI", "Median NDVI")
 
 png.title3 = list("MeanNDVI", "MedianNDVI")
 
-## 
+## produce figures using for loop  
 for (i in 1:2){
-
-
 r1.grd = calc(list.stack3[[i]], mean, na.rm = TRUE)
 r1.grd[forestarea.grd < 5] = NA
 
@@ -274,9 +252,6 @@ r1.range = c(min_, max_)
 r1.grd[r1.grd > r1.range[2]] = r1.range[2]
 r1.grd[r1.grd < r1.range[1]] = r1.range[1]
 
-# r1.grd[r1.grd > r1.range[2]] = NA
-# r1.grd[r1.grd < r1.range[1]] = NA
-
 png(paste0(yourdatafolder,png.title3[[i]],".png"),height = 1500, width = 2000, res = 300, units = "px")
 
 p.strip <- list(cex=1, lines=2, fontface='bold')
@@ -284,15 +259,10 @@ rasterVis::levelplot(r1.grd,
           zlim = r1.range,
 		  margin = FALSE,
 		  main = list.title3[[i]],
-		  # main = expression("Net C Uptake Trend"~ "("~gC ~ m^{-2} ~ yr ^{-1}~ yr ^{-1}~ "1980-2017" ~")"),		  
           maxpixels = nrow(r1.grd)*ncol(r1.grd),
-          # col.regions = rev(colorRampPalette(c("blue", "white", "red"))(255)),
 		  col.regions = colorRampPalette(c("#4575b4", "#ffffbf", "#d73027"))(255),
-          # scales=list(x=list(cex=1),y=list(cex=1)),
-          # xlab=list(label = "Longtitude", cex=1),ylab=list(label = "Latitude", cex=1),
 		  xlab=NULL, ylab=NULL,
 		  scales=list(draw=FALSE),
-		  # layout=c(5, 1),
 		  colorkey=list(space="right", 
 		                at=seq(r1.range[1], r1.range[2], length.out=100), 
 						height=1, 
@@ -326,9 +296,6 @@ ggplot() + geom_histogram(aes(x = myData), binwidth = binwidth, fill = colorRamp
 aes(y=100*stat(count)/sum(stat(count)))+
 geom_vline(aes(xintercept = mean(myData, na.rm = TRUE)),col='black',size=2, lty = 2)+
 theme_bw() + 
-  # scale_fill_discrete(breaks=shortnames,
-                      # name="",
-                      # labels=shortnames)+
   theme(legend.text = element_text(size = 18))+
   theme(axis.title.x = element_text(face="bold", colour="black", size=18),axis.text.x  = element_text(colour="black",size=18))+
   theme(axis.title.y = element_text(face="bold", colour="black", size=18),axis.text.y  = element_text(colour="black",size=18))+
@@ -363,9 +330,6 @@ r1.range = c(-max(abs(min_),abs(max_)),max(abs(min_),abs(max_)))
 r1.grd[r1.grd > r1.range[2]] = r1.range[2]
 r1.grd[r1.grd < r1.range[1]] = r1.range[1]
 
-# plot(r1.grd)
-## extract p value < 0.1, and add to plot
-# https://github.com/liuzh811/ForestDegradationWestAfrica/blob/master/function.r
 pts.sp.sig1 = Ex.pts(list.stack4[[i]][[2]], sig.level = 0.05) #extract significant relation points
 
 png(paste0(yourdatafolder,png.title4[[i]],".png"),height = 1500, width = 2000, res = 300, units = "px")
@@ -375,15 +339,10 @@ levelplot(r1.grd,
           zlim = r1.range,
 		  margin = FALSE,
 		  main = list.title4[[i]],
-		  # main = expression("Net C Uptake Trend"~ "("~gC ~ m^{-2} ~ yr ^{-1}~ yr ^{-1}~ "1980-2017" ~")"),		  
           maxpixels = nrow(r1.grd)*ncol(r1.grd),
           col.regions = colorRampPalette(c("blue", "white", "red"))(255),
-		  # col.regions = colorRampPalette(c("blue", "yellow", "red"))(255),
-          # scales=list(x=list(cex=1),y=list(cex=1)),
-          # xlab=list(label = "Longtitude", cex=1),ylab=list(label = "Latitude", cex=1),
 		  xlab=NULL, ylab=NULL,
 		  scales=list(draw=FALSE),
-		  # layout=c(5, 1),
 		  colorkey=list( space="bottom", 
 						# x= 0.5, y = 0.5,
 		                at=seq(r1.range[1], r1.range[2], length.out=100), 
@@ -403,13 +362,9 @@ binwidth <- as.numeric((r1.range[2]-r1.range[1])/20)
 
 n_bins <- length(ggplot2:::bin_breaks_width(range(myData, na.rm = TRUE), width = binwidth)$breaks) - 1L
 ggplot() + geom_histogram(aes(x = myData), binwidth = binwidth, fill = colorRampPalette(c("blue", "white", "red"))(n_bins)) + 
-# ggplot() + geom_histogram(aes(x = myData), binwidth = binwidth, fill = colorRampPalette(c("#4575b4", "#ffffbf", "#d73027"))(n_bins)) + 
 	aes(y=100*stat(count)/sum(stat(count)))+
 	geom_vline(aes(xintercept = mean(myData, na.rm = TRUE)),col='black',size=2, lty = 2)+
 	theme_bw() + 
-  # scale_fill_discrete(breaks=shortnames,
-                      # name="",
-                      # labels=shortnames)+
   theme(legend.text = element_text(size = 18))+
   theme(axis.title.x = element_text(face="bold", colour="black", size=18),axis.text.x  = element_text(colour="black",size=18))+
   theme(axis.title.y = element_text(face="bold", colour="black", size=18),axis.text.y  = element_text(colour="black",size=18))+
@@ -422,7 +377,8 @@ ggsave(paste0(yourdatafolder,png.title4[[i]],"_histgram.png"), width = 6, height
 
 }
 
-#### plot total disturbed area, use this one
+#####################################################
+############## plot total disturbed area #################
 chn.shp = readOGR(dsn=yourdatafolder, layer="wc2.1_10m_prec.1970-2000")
 forestarea.df = read.csv("forest_area_by_GridID2.csv")
 forestarea.df$ForestArea[which(is.na(forestarea.df$ForestArea))] = 0
@@ -437,7 +393,7 @@ chn.shp2 = readOGR(dsn=yourdatafolder, layer="CHN_adm1_wTaiwan")
 lt =  data.frame(read.csv(paste0("istubrance_area_by_GridID.csv")))
 lt = merge(chn.shp@data, lt, by.x = "ID", by.y = "GridID", all.x = TRUE)
 
-yrs = 1986:2019
+yrs = 1986:2020
 
 sum.stack = stack()
 burnrate.stack = stack()
@@ -477,9 +433,6 @@ r1.range = c(min_, max_)
 r1.grd[r1.grd > r1.range[2]] = r1.range[2]
 r1.grd[r1.grd < r1.range[1]] = r1.range[1]
 
-plot(r1.grd)
-# plot(chn.shp2, add = TRUE)
-
 png(paste0(yourdatafolder,png.title8[[i]],".png"),height = 1500, width = 2000, res = 300, units = "px")
 
 p.strip <- list(cex=1, lines=2, fontface='bold')
@@ -487,15 +440,10 @@ rasterVis::levelplot(r1.grd,
           zlim = r1.range,
 		  margin = FALSE,
 		  main = list.title8[[i]],
-		  # main = expression("Net C Uptake Trend"~ "("~gC ~ m^{-2} ~ yr ^{-1}~ yr ^{-1}~ "1980-2017" ~")"),		  
           maxpixels = nrow(r1.grd)*ncol(r1.grd),
-          # col.regions = rev(colorRampPalette(c("blue", "white", "red"))(255)),
 		  col.regions = colorRampPalette(c("#4575b4", "#ffffbf", "#d73027"))(255),
-          # scales=list(x=list(cex=1),y=list(cex=1)),
-          # xlab=list(label = "Longtitude", cex=1),ylab=list(label = "Latitude", cex=1),
 		  xlab=NULL, ylab=NULL,
 		  scales=list(draw=FALSE),
-		  # layout=c(5, 1),
 		  colorkey=list(space="right", 
 		                at=seq(r1.range[1], r1.range[2], length.out=100), 
 						height=1, 
@@ -517,9 +465,6 @@ ggplot() + geom_histogram(aes(x = myData), binwidth = binwidth, fill = colorRamp
 aes(y=100*stat(count)/sum(stat(count)))+
 geom_vline(aes(xintercept = mean(myData, na.rm = TRUE)),col='black',size=2, lty = 2)+
 theme_bw() + 
-  # scale_fill_discrete(breaks=shortnames,
-                      # name="",
-                      # labels=shortnames)+
   theme(legend.text = element_text(size = 18))+
   theme(axis.title.x = element_text(face="bold", colour="black", size=18),axis.text.x  = element_text(colour="black",size=18))+
   theme(axis.title.y = element_text(face="bold", colour="black", size=18),axis.text.y  = element_text(colour="black",size=18))+
@@ -535,8 +480,6 @@ ggsave(paste0(yourdatafolder,png.title8[[i]],"_histgram.png"), width = 6, height
 # #############################look at trend ##################################
 # install.packages("spatialEco")
 library(spatialEco)
-# raster.kendall(x, tau = FALSE, intercept = FALSE, p.value = FALSE, z.value = FALSE, confidence = FALSE, autocorrelation = FALSE, ...)
-
 #length of NAs
 lenNA = function(x){return(length(which(is.na(x))))}
 
@@ -576,8 +519,7 @@ r1.grd[r1.grd < r1.range[1]] = r1.range[1]
 
 plot(r1.grd)
 
-## extract p value < 0.1, and add to plot
-# https://github.com/liuzh811/ForestDegradationWestAfrica/blob/master/function.r
+## extract p value < 0.05, and add to plot
 pts.sp.sig1 = Ex.pts(list.stack9[[i]][[2]], sig.level = 0.05) #extract significant relation points
 
 
@@ -588,15 +530,10 @@ rasterVis::levelplot(r1.grd,
           zlim = r1.range,
 		  margin = FALSE,
 		  main = list.title9[[i]],
-		  # main = expression("Net C Uptake Trend"~ "("~gC ~ m^{-2} ~ yr ^{-1}~ yr ^{-1}~ "1980-2017" ~")"),		  
           maxpixels = nrow(r1.grd)*ncol(r1.grd),
           col.regions = colorRampPalette(c("blue", "white", "red"))(255),
-		  # col.regions = colorRampPalette(c("blue", "yellow", "red"))(255),
-          # scales=list(x=list(cex=1),y=list(cex=1)),
-          # xlab=list(label = "Longtitude", cex=1),ylab=list(label = "Latitude", cex=1),
 		  xlab=NULL, ylab=NULL,
 		  scales=list(draw=FALSE),
-		  # layout=c(5, 1),
 		  colorkey=list( space="bottom", 
 						# x= 0.5, y = 0.5,
 		                at=seq(r1.range[1], r1.range[2], length.out=100), 
@@ -618,13 +555,9 @@ binwidth <- as.numeric((r1.range[2]-r1.range[1])/20)
 
 n_bins <- length(ggplot2:::bin_breaks_width(range(myData, na.rm = TRUE), width = binwidth)$breaks) - 1L
 ggplot() + geom_histogram(aes(x = myData), binwidth = binwidth, fill = colorRampPalette(c("blue", "white", "red"))(n_bins)) + 
-# ggplot() + geom_histogram(aes(x = myData), binwidth = binwidth, fill = colorRampPalette(c("#4575b4", "#ffffbf", "#d73027"))(n_bins)) + 
 	aes(y=100*stat(count)/sum(stat(count)))+
 	geom_vline(aes(xintercept = mean(myData, na.rm = TRUE)),col='black',size=2, lty = 2)+
 	theme_bw() + 
-  # scale_fill_discrete(breaks=shortnames,
-                      # name="",
-                      # labels=shortnames)+
   theme(legend.text = element_text(size = 18))+
   theme(axis.title.x = element_text(face="bold", colour="black", size=18),axis.text.x  = element_text(colour="black",size=18))+
   theme(axis.title.y = element_text(face="bold", colour="black", size=18),axis.text.y  = element_text(colour="black",size=18))+
