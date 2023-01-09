@@ -1,8 +1,8 @@
 # Patterns, trends, and drivers of disturbance regimes in China's forest from 1986 to 2020
 ## Introduction 
-This repository was created to store data and codes used for Liu et al., 2022, Communications Earth & Environment.
+This repository was created to store data and codes used for Liu et al., 2023, Communications Earth & Environment.
 ## Citation
-Liu et al., (In review) Ecological protection policy decreases forest disturbance in China from 1986 to 2020. Communications Earth & Environment.
+Liu et al., (2023) Forest disturbance decreased in China from 1986 to 2020 despite regional variations. Communications Earth & Environment.
 ## folder description
 1. The data folder contains the data description used in the manuscript.
 2. The code folder contains the main R codes for analysis and plot.
