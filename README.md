@@ -2,7 +2,7 @@
 ## Introduction 
 This repository was created to store data and codes used for Liu et al., 2023, Communications Earth & Environment.
 ## Citation
-Liu et al., (2023) Forest disturbance decreased in China from 1986 to 2020 despite regional variations. Communications Earth & Environment.
+Liu, Z., Wang, W.J., Ballantyne, A. et al. Forest disturbance decreased in China from 1986 to 2020 despite regional variations. Commun Earth Environ 4, 15 (2023). https://doi.org/10.1038/s43247-023-00676-x
 ## folder description
 1. The data folder contains the data description used in the manuscript.
 2. The code folder contains the main R codes for analysis and plot.
